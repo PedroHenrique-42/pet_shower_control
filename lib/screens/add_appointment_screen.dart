@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/appointment_model.dart';
@@ -134,6 +135,14 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
     }
   }
 
+  String _capitalize(String text) {
+    if (text.trim().isEmpty) return '';
+    return text.trim().split(RegExp(r'\s+')).map((word) {
+      if (word.isEmpty) return '';
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
+
   void _save() {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
@@ -147,16 +156,21 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
       _selectedTime.minute,
     );
 
+    final formattedClientName = _capitalize(_clientName);
+    final formattedPetName = _capitalize(_petName);
+    final formattedPetBreed = _capitalize(_petBreed);
+    final formattedGroomerName = _capitalize(_groomerName);
+
     if (widget.appointment != null) {
       final updated = widget.appointment!.copyWith(
-        clientName: _clientName,
+        clientName: formattedClientName,
         clientPhone: _clientPhone,
-        petName: _petName,
+        petName: formattedPetName,
         petType: _petType,
-        petBreed: _petBreed,
+        petBreed: formattedPetBreed,
         petSize: _petSize,
         serviceName: _serviceName,
-        groomerName: _groomerName,
+        groomerName: formattedGroomerName,
         dateTime: dateTime,
         price: _price,
         notes: _notes,
@@ -166,14 +180,14 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
     } else {
       final newApp = Appointment(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        clientName: _clientName,
+        clientName: formattedClientName,
         clientPhone: _clientPhone,
-        petName: _petName,
+        petName: formattedPetName,
         petType: _petType,
-        petBreed: _petBreed,
+        petBreed: formattedPetBreed,
         petSize: _petSize,
         serviceName: _serviceName,
-        groomerName: _groomerName,
+        groomerName: formattedGroomerName,
         dateTime: dateTime,
         price: _price,
         notes: _notes,
@@ -234,8 +248,13 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                     label: 'Nome do Cliente',
                     initialValue: _clientName,
                     icon: Icons.person_outline,
+                    textCapitalization: TextCapitalization.words,
                     onSaved: (val) => _clientName = val ?? '',
-                    validator: (val) => val == null || val.isEmpty ? 'Insira o nome do cliente' : null,
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) return 'Insira o nome do cliente';
+                      if (val.trim().length < 3) return 'Nome deve conter ao menos 3 caracteres';
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 12),
                   _buildTextField(
@@ -243,8 +262,14 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                     initialValue: _clientPhone,
                     icon: Icons.phone_outlined,
                     keyboardType: TextInputType.phone,
+                    inputFormatters: [TelefoneInputFormatter()],
                     onSaved: (val) => _clientPhone = val ?? '',
-                    validator: (val) => val == null || val.isEmpty ? 'Insira o telefone' : null,
+                    validator: (val) {
+                      if (val == null || val.isEmpty) return 'Insira o telefone';
+                      final cleanVal = val.replaceAll(RegExp(r'\D'), '');
+                      if (cleanVal.length < 10) return 'O telefone deve ter pelo menos 10 dígitos';
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 20),
 
@@ -254,8 +279,13 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
                     label: 'Nome do Pet',
                     initialValue: _petName,
                     icon: Icons.pets_outlined,
+                    textCapitalization: TextCapitalization.words,
                     onSaved: (val) => _petName = val ?? '',
-                    validator: (val) => val == null || val.isEmpty ? 'Insira o nome do pet' : null,
+                    validator: (val) {
+                      if (val == null || val.trim().isEmpty) return 'Insira o nome do pet';
+                      if (val.trim().length < 2) return 'Nome deve conter ao menos 2 caracteres';
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 12),
                   Row(
@@ -428,6 +458,8 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
+    TextCapitalization textCapitalization = TextCapitalization.none,
+    List<TextInputFormatter>? inputFormatters,
     required FormFieldSetter<String> onSaved,
     FormFieldValidator<String>? validator,
   }) {
@@ -435,6 +467,9 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
       initialValue: initialValue,
       keyboardType: keyboardType,
       maxLines: maxLines,
+      textCapitalization: textCapitalization,
+      inputFormatters: inputFormatters,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       onSaved: onSaved,
       validator: validator,
       decoration: InputDecoration(
@@ -518,6 +553,8 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
           focusNode: focusNode,
           onSaved: onSaved,
           validator: validator,
+          textCapitalization: TextCapitalization.words,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           decoration: InputDecoration(
             labelText: label,
             prefixIcon: Icon(icon, color: const Color(0xFFD4A373)),
@@ -617,3 +654,33 @@ class _AddAppointmentScreenState extends State<AddAppointmentScreen> {
     );
   }
 }
+
+class TelefoneInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    final text = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (text.length > 11) {
+      return oldValue;
+    }
+    String formatted = '';
+    if (text.isNotEmpty) {
+      formatted += '(';
+      if (text.length <= 2) {
+        formatted += text;
+      } else {
+        formatted += '${text.substring(0, 2)}) ';
+        if (text.length <= 7) {
+          formatted += text.substring(2);
+        } else {
+          formatted += '${text.substring(2, 7)}-${text.substring(7)}';
+        }
+      }
+    }
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+

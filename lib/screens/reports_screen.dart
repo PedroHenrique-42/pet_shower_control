@@ -173,31 +173,42 @@ class ReportsScreen extends StatelessWidget {
                         itemBuilder: (context, index) {
                           final name = clientsMap.keys.elementAt(index);
                           final phone = clientsMap[name]!;
-                          return ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: primaryCaramel.withOpacity(0.1),
-                              child: const Icon(Icons.person, color: primaryCaramel),
-                            ),
-                            title: Text(
-                              name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: darkSlate,
+                          return Material(
+                            color: Colors.transparent,
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: primaryCaramel.withOpacity(0.1),
+                                child: const Icon(Icons.person, color: primaryCaramel),
                               ),
-                            ),
-                            subtitle: Text(phone),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.phone_forwarded, color: primaryCaramel),
-                              tooltip: 'Ligar para Cliente',
-                              onPressed: () {
-                                // Apenas feedback visual (ou integration futura com url_launcher)
+                              title: Text(
+                                name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: darkSlate,
+                                ),
+                              ),
+                              subtitle: Text(phone),
+                              onTap: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Ligando para $name ($phone)...'),
+                                    content: Text('Cliente: $name • Tel: $phone'),
                                     duration: const Duration(seconds: 1),
                                   ),
                                 );
                               },
+                              trailing: IconButton(
+                                icon: const Icon(Icons.phone_forwarded, color: primaryCaramel),
+                                tooltip: 'Ligar para Cliente',
+                                onPressed: () {
+                                  // Apenas feedback visual (ou integração futura com url_launcher)
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Ligando para $name ($phone)...'),
+                                      duration: const Duration(seconds: 1),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           );
                         },

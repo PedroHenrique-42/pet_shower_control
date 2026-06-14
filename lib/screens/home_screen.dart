@@ -169,56 +169,59 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6.0),
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  _selectedDate = date;
-                });
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 60,
-                decoration: BoxDecoration(
-                  color: isSelected ? primaryColor : Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSelected
-                        ? primaryColor
-                        : (isToday ? primaryColor.withOpacity(0.5) : Colors.grey.shade200),
-                    width: isToday ? 2 : 1,
-                  ),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: primaryColor.withOpacity(0.3),
-                            blurRadius: 6,
-                            offset: const Offset(0, 3),
-                          )
-                        ]
-                      : null,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 60,
+              decoration: BoxDecoration(
+                color: isSelected ? primaryColor : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isSelected
+                      ? primaryColor
+                      : (isToday ? primaryColor.withOpacity(0.5) : Colors.grey.shade200),
+                  width: isToday ? 2 : 1,
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      dayName,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                        color: isSelected ? Colors.white : Colors.grey.shade600,
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: primaryColor.withOpacity(0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        )
+                      ]
+                    : null,
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _selectedDate = date;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        dayName,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          color: isSelected ? Colors.white : Colors.grey.shade600,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      dayNum,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? Colors.white : textColor,
+                      const SizedBox(height: 4),
+                      Text(
+                        dayNum,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? Colors.white : textColor,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -408,30 +411,33 @@ class _HomeScreenState extends State<HomeScreen> {
     final timeStr = DateFormat('HH:mm').format(appointment.dateTime);
 
     return Card(
-      color: Colors.white,
+      color: Colors.transparent,
       margin: const EdgeInsets.only(bottom: 12.0),
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: Colors.grey.shade100),
       ),
-      child: InkWell(
-        onTap: () {
-          // Abrir tela para editar agendamento
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AddAppointmentScreen(appointment: appointment),
-            ),
-          );
-        },
-        onLongPress: () {
-          _showDeleteConfirmation(context, provider, appointment);
-        },
+      child: Material(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () {
+            // Abrir tela para editar agendamento
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => AddAppointmentScreen(appointment: appointment),
+              ),
+            );
+          },
+          onLongPress: () {
+            _showDeleteConfirmation(context, provider, appointment);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Linha Superior: Pet Name, Tipo e Status Badge
@@ -630,8 +636,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   // Botões rápidos de mudança de status
   Widget _buildStatusTransitionButtons(
